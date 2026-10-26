@@ -49,4 +49,5 @@ for (const [f, html] of site) fs.writeFileSync(new URL(f, OUT), html);
 fs.writeFileSync(new URL('sitemap.xml', OUT), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
   site.map(([f, , d]) => `<url><loc>${BASE}${f === 'index.html' ? '' : f}</loc>${d ? `<lastmod>${d}</lastmod>` : ''}</url>`).join('\n') + '\n</urlset>\n');
 fs.writeFileSync(new URL('.nojekyll', OUT), '');
+fs.writeFileSync(new URL('google1c77007b912eef19.html', OUT), 'google-site-verification: google1c77007b912eef19.html'); // 서치콘솔 소유확인(10/26) — 지우면 확인 풀림
 console.log('허브 생성:', BLOGS.map(B => `${B.name} ${B.list.length}편(최신 ${B.list[0]?.d})`).join(' · '), '→', OUT.pathname);
