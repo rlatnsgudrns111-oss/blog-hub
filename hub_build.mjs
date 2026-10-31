@@ -10,7 +10,7 @@ const OUT = new URL('./_site/', import.meta.url);
 const GSV = process.env.GSV || ''; // 서치콘솔 HTML 태그 소유확인 값(content=…)
 const BLOGS = [
   { id: 'hwaje_now', name: '지금화제', about: '방송·연예 화제를 공식 발표와 방송 내용 기준으로 정리' },
-  { id: 'gangwon_now', name: '강원나우', about: '강원 18개 시·군 축제·여행·분양 정보를 공고문 기준으로 정리' },
+  { id: 'gangwon_now', name: '강원나우', about: '강원 18개 시·군 축제·여행·분양 정보를 공고문 기준으로 정리', text: 'https://rlatnsgudrns111-oss.github.io/gangwon-now/' }, // text = 구글·AI용 글자판 사이트(10/31 공개)
 ];
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36';
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -32,16 +32,17 @@ const page = (title, desc, body) => `<!doctype html><html lang="ko"><head><meta 
 <title>${esc(title)}</title><meta name="description" content="${esc(desc)}">${GSV ? `<meta name="google-site-verification" content="${esc(GSV)}">` : ''}
 <style>body{font:16px/1.6 system-ui,sans-serif;max-width:760px;margin:0 auto;padding:16px;color:#222;background:#fff}a{color:#0b57d0}li{margin:0 0 14px}small{color:#666}p.b{margin:2px 0 0;color:#444;font-size:14px}</style></head><body>${body}</body></html>`;
 
+const textLink = B => B.text ? ` · <a href="${B.text}">${B.name} 글 전문 보기(사진 없는 글자판)</a>` : '';
 const site = [];
 for (const B of BLOGS) {
   B.list = await posts(B.id);
   const li = B.list.map(p => `<li><a href="https://m.blog.naver.com/${B.id}/${p.no}">${esc(p.t)}</a> <small>${p.d} · ${esc(p.c)}</small><p class="b">${esc(p.b)}…</p></li>`).join('\n');
   site.push([`${B.id}.html`, page(`${B.name} 전체 글 목록`, `${B.name}(네이버 블로그) — ${B.about}. 전체 ${B.list.length}편.`,
-    `<h1>${B.name} 전체 글</h1><p>${esc(B.about)}. <a href="https://blog.naver.com/${B.id}">블로그 바로가기</a> · <a href="./">처음으로</a></p><ol>\n${li}\n</ol>`), B.list[0]?.d]);
+    `<h1>${B.name} 전체 글</h1><p>${esc(B.about)}. <a href="https://blog.naver.com/${B.id}">블로그 바로가기</a>${textLink(B)} · <a href="./">처음으로</a></p><ol>\n${li}\n</ol>`), B.list[0]?.d]);
 }
 const latest = B => B.list.slice(0, 10).map(p => `<li><a href="https://m.blog.naver.com/${B.id}/${p.no}">${esc(p.t)}</a> <small>${p.d}</small></li>`).join('\n');
 site.unshift(['index.html', page('지금화제 · 강원나우 블로그 글 모음', '네이버 블로그 지금화제와 강원나우의 새 글 목록', `<h1>블로그 글 모음</h1>` +
-  BLOGS.map(B => `<h2><a href="${B.id}.html">${B.name}</a></h2><p>${esc(B.about)}. 전체 ${B.list.length}편.</p><ol>\n${latest(B)}\n</ol><p><a href="${B.id}.html">${B.name} 전체 글 보기 →</a></p>`).join('')),
+  BLOGS.map(B => `<h2><a href="${B.id}.html">${B.name}</a></h2><p>${esc(B.about)}. 전체 ${B.list.length}편.${textLink(B)}</p><ol>\n${latest(B)}\n</ol><p><a href="${B.id}.html">${B.name} 전체 글 보기 →</a></p>`).join('')),
   BLOGS.map(B => B.list[0]?.d).sort().pop()]);
 
 fs.mkdirSync(OUT, { recursive: true });
